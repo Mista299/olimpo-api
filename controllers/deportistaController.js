@@ -1,4 +1,5 @@
 import Deportista from '../models/deportistaSchema.js';  // Asegúrate de tener tu modelo de "Deportista"
+import User from './models/user.js'; // Asegúrate de importar tu modelo de User
 
 // Controlador para crear un deportista
 export const crearDeportista = async (req, res) => {
@@ -62,5 +63,30 @@ export const obtenerDeportistas = async (req, res) => {
       message: 'Error al obtener los deportistas',
       error: error.message,
     });
+  }
+};
+
+// Método para vincular un deportista existente a un usuario usando el email del usuario y la cédula del deportista
+export const vincularDeportistaExistenteAUsuario = async (emailUsuario, cedulaDeportista) => {
+  try {
+    // Buscamos el usuario por su email
+    const usuario = await User.findOne({ email: emailUsuario });
+    if (!usuario) {
+      return { message: 'Usuario no encontrado' };
+    }
+
+    // Buscamos el deportista existente por su cédula
+    const deportistaExistente = await Deportista.findOne({ cedula_deportista: cedulaDeportista });
+    if (!deportistaExistente) {
+      return { message: 'Deportista no encontrado' };
+    }
+
+    // Vinculamos el deportista con el usuario (asumimos que el usuario tiene un campo `deportista`)
+    usuario.deportista = deportistaExistente._id;
+    await usuario.save();
+
+    return { message: 'Deportista vinculado al usuario exitosamente', usuario };
+  } catch (error) {
+    return { message: 'Error al vincular deportista al usuario', error };
   }
 };
