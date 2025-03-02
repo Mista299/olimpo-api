@@ -2,6 +2,9 @@ import express from 'express';
 import { connectToDatabase } from './config/database.js';
 import deportistaRoutes from './routes/deportistaRoutes.js';
 import inscripcionRoutes from './routes/inscripcionRoutes.js';
+import userRoutes from './routes/userRoutes.js';
+import authRoutes from './routes/authRoutes.js';
+import router from './routes/router.js';
 
 const app = express();
 
@@ -14,6 +17,11 @@ connectToDatabase();
 // Definir rutas
 app.use('/api/deportistas', deportistaRoutes);
 app.use('/api/inscripciones', inscripcionRoutes);
+app.use('/api/user', userRoutes);
+app.use('/api/auth', authRoutes);
+app.use('/', router);
+
+
 
 // Ruta de pruebas
 app.get('/', (req, res) => {

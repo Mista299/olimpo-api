@@ -1,5 +1,5 @@
 import Deportista from '../models/deportistaSchema.js';  // Asegúrate de tener tu modelo de "Deportista"
-import User from './models/user.js'; // Asegúrate de importar tu modelo de User
+import User from '../models/userSchema.js'; // Asegúrate de importar tu modelo de User
 
 // Controlador para crear un deportista
 export const crearDeportista = async (req, res) => {
@@ -90,3 +90,94 @@ export const vincularDeportistaExistenteAUsuario = async (emailUsuario, cedulaDe
     return { message: 'Error al vincular deportista al usuario', error };
   }
 };
+
+export const newUserDeportista = async (cedulaUsuario, datosDeportista) => {
+  try {
+
+    const usuario = await User.findOne({ email: emailUsuario });
+    
+    if (!usuario) {
+      return { message: 'Usuario no encontrado' };
+    }
+
+    const nuevoDeportista = new Deportista({
+      ...datosDeportista 
+    });
+
+    const deportistaGuardado = await nuevoDeportista.save();
+
+    usuario.deportista = deportistaGuardado._id;
+    await usuario.save();
+
+    return { message: 'Deportista vinculado al usuario exitosamente', usuario };
+  } catch (error) {
+    return { message: 'Error al vincular deportista al usuario', error };
+  }
+};
+
+export const editarDeportista = async (req, res) => {
+  const { cedula_deportista } = req.params; // Obtenemos la cédula del deportista de los parámetros de la ruta
+  const nuevosDatos = req.body; // Los nuevos datos se envían en el cuerpo de la solicitud
+
+  try {
+    // Buscar el deportista por su cédula
+    const deportista = await Deportista.findOne({ cedula_deportista });
+
+    if (!deportista) {
+      return res.status(404).json({ message: 'Deportista no encontrado' });
+    }
+
+    // Actualizar los campos del deportista con los nuevos datos
+    Object.assign(deportista, nuevosDatos);
+
+    // Guardar los cambios en la base de datos
+    const deportistaActualizado = await deportista.save();
+
+    res.status(200).json({
+      message: 'Deportista actualizado exitosamente',
+      deportista: deportistaActualizado,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error al actualizar el deportista',
+      error: error.message,
+    });
+  }
+};
+
+
+export const editarDeportistaFromUser = async (req, res) => {
+  const { cedula_deportista } = req.params; // Cédula del deportista que se quiere editar
+  const usuarioAutenticado = req.user; // Suponiendo que el middleware verificarToken añade el usuario autenticado a req.user
+
+  try {
+    // Verifica si la cédula del deportista coincide con la del usuario autenticado
+    if (usuarioAutenticado.cedula_deportista !== cedula_deportista) {
+      return res.status(403).json({
+        message: 'No tienes permiso para editar los datos de otro deportista.',
+      });
+    }
+
+    // Si pasa la validación, procede a editar los datos del deportista
+    const deportistaActualizado = await Deportista.findOneAndUpdate(
+      { cedula_deportista }, 
+      req.body, 
+      { new: true }
+    );
+
+    if (!deportistaActualizado) {
+      return res.status(404).json({ message: 'Deportista no encontrado.' });
+    }
+
+    res.status(200).json({
+      message: 'Deportista actualizado exitosamente',
+      deportista: deportistaActualizado,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error al actualizar el deportista',
+      error: error.message,
+    });
+  }
+};
+

@@ -1,12 +1,11 @@
 import express from 'express';
 import { crearInscripcion, obtenerInscripciones } from '../controllers/inscripcionController.js';
+import { verificarToken, verificarAdmin } from '../middlewares/authMiddleware.js';
+
 
 const router = express.Router();
 
-// Ruta POST para crear una mensualidad
-router.post('/', crearInscripcion);
-
-// Ruta GET para obtener todas las mensualidades
-router.get('/', obtenerInscripciones);
+router.post('/', verificarToken, verificarAdmin, crearInscripcion);
+router.get('/', verificarToken, verificarAdmin, obtenerInscripciones);
 
 export default router;
