@@ -18,6 +18,4 @@ const deportistaSchema = new mongoose.Schema({
   inscripcion: { type: inscripcionSchema, required: false } // Usamos el esquema como tipo
 });
 
-deportistaSchema.index({ cedula_deportista: 1 }, { unique: true });
-
 export default mongoose.model('Deportista', deportistaSchema); // Exportamos el modelo
