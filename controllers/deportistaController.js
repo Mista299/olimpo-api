@@ -116,33 +116,36 @@ export const newUserDeportista = async (cedulaUsuario, datosDeportista) => {
 };
 
 export const editarDeportista = async (req, res) => {
-  const { cedula_deportista } = req.params; // Obtenemos la cédula del deportista de los parámetros de la ruta
-  const nuevosDatos = req.body; // Los nuevos datos se envían en el cuerpo de la solicitud
+    const cedula = req.params.cedula_deportista; // Captura la cédula desde la URL
 
-  try {
-    // Buscar el deportista por su cédula
-    const deportista = await Deportista.findOne({ cedula_deportista });
+    try {
+        // Busca el deportista por la cédula
+        const deportista = await Deportista.findOne({ cedula_deportista: cedula });
 
-    if (!deportista) {
-      return res.status(404).json({ message: 'Deportista no encontrado' });
+        if (!deportista) {
+            return res.status(404).json({ message: 'Deportista no encontrado' });
+        }
+
+        // Itera sobre las propiedades de req.body y actualiza el documento deportista
+        for (const key in req.body) {
+            if (req.body.hasOwnProperty(key) && deportista[key] !== undefined) {
+                deportista[key] = req.body[key]; // Actualiza cada campo solo si existe en el body
+            }
+        }
+
+        // Guarda los cambios
+        await deportista.save();
+
+        res.status(200).json({
+            message: 'Deportista actualizado exitosamente',
+            deportista
+        });
+    } catch (error) {
+        res.status(500).json({
+            message: 'Error al actualizar el deportista.',
+            error
+        });
     }
-
-    // Actualizar los campos del deportista con los nuevos datos
-    Object.assign(deportista, nuevosDatos);
-
-    // Guardar los cambios en la base de datos
-    const deportistaActualizado = await deportista.save();
-
-    res.status(200).json({
-      message: 'Deportista actualizado exitosamente',
-      deportista: deportistaActualizado,
-    });
-  } catch (error) {
-    res.status(500).json({
-      message: 'Error al actualizar el deportista',
-      error: error.message,
-    });
-  }
 };
 
 

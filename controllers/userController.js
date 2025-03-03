@@ -139,31 +139,58 @@ export const enviarDatosUsuario = (req, res) => {
 
 
 // Controlador para editar el email y la contraseña sólo desde el usuario autenticado
+// Controlador para editar el email y la contraseña sólo desde el usuario autenticado
 export const editarUsuarioFromUser = async (req, res) => {
   try {
-
-    const usuarioId = req.user._id;
-    const { email, password } = req.body;
+    // 1. Obtener el ID del usuario autenticado desde el token (req.user.id)
+    const usuarioId = req.user.id;
+    
+    // 2. Obtener el email, la nueva contraseña y la contraseña antigua del cuerpo de la solicitud
+    const { email, password, oldPassword } = req.body;
+    
+    // 3. Buscar al usuario en la base de datos
     const usuario = await User.findById(usuarioId);
 
+    // 4. Verificar si el usuario existe
     if (!usuario) {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
-    if (email) usuario.email = email;
+
+    // 5. Actualizar el email si fue proporcionado
+    if (email) {
+      usuario.email = email;
+    }
+
+    // 6. Verificar la contraseña antigua antes de permitir el cambio de la nueva
     if (password) {
-      // Hashear la nueva contraseña antes de guardarla
+      if (!oldPassword) {
+        return res.status(400).json({ message: 'Debe proporcionar la contraseña antigua para cambiarla.' });
+      }
+
+      // Comparar la contraseña antigua con la almacenada en la base de datos
+      const isMatch = await bcrypt.compare(oldPassword, usuario.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: 'La contraseña antigua es incorrecta.' });
+      }
+
+      // Si la contraseña antigua es correcta, hashear la nueva contraseña antes de guardarla
       const salt = await bcrypt.genSalt(10);
       usuario.password = await bcrypt.hash(password, salt);
     }
+
+    // 7. Guardar el usuario actualizado en la base de datos
     const usuarioActualizado = await usuario.save();
 
+    // 8. Enviar una respuesta con el email actualizado (sin incluir la contraseña)
     res.status(200).json({
       message: 'Usuario actualizado exitosamente',
       usuario: {
         email: usuarioActualizado.email,
       },
     });
+
   } catch (error) {
+    // 9. Manejo de errores
     res.status(500).json({
       message: 'Error al actualizar el usuario',
       error: error.message,
