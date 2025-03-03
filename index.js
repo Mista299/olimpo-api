@@ -5,11 +5,15 @@ import inscripcionRoutes from './routes/inscripcionRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import router from './routes/router.js';
+import cors from 'cors'
 
 const app = express();
 
 // Middleware para parsear JSON
 app.use(express.json());
+
+const allowedOrigins = ['http://localhost:5173', 'https://olimpo-api.vercel.app/'];
+app.use(cors(allowedOrigins));
 
 // Conectar a la base de datos
 connectToDatabase();
