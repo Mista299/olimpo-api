@@ -105,12 +105,23 @@ export const agregarUsuario = async (req, res) => {
 
 export const obtenerTodosLosUsuarios = async (req, res) => {
   try {
+    // Obtener el token desde las cookies
+    const token = req.cookies.token;
+
     const usuarios = await User.find(); // Esto obtiene todos los usuarios de la base de datos
-    res.status(200).json({ message: 'Usuarios obtenidos exitosamente', usuarios });
+    res.status(200).json({
+      message: 'Usuarios obtenidos exitosamente',
+      usuarios,
+      debug: {
+        cookies: req.cookies,
+        token, // Incluye el token en la respuesta para depuración
+      }
+    });
   } catch (error) {
     res.status(500).json({ message: 'Error al obtener los usuarios', error });
   }
 };
+
 
 // Método para eliminar un usuario
 export const eliminarUsuario = async (req, res) => {

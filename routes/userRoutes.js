@@ -10,7 +10,7 @@ router.post('/', agregarUsuario);
 // Ruta protegida para obtener todos los usuarios (GET)
 
 //editar como admin
-router.get('/', verificarToken, verificarAdmin, obtenerTodosLosUsuarios, enviarDatosUsuario);
+router.get('/', verificarToken, verificarAdmin, enviarDatosUsuario, obtenerTodosLosUsuarios );
 router.delete('/:email', verificarToken, verificarAdmin, eliminarUsuario);
 //editar como usuario
 router.put('/', verificarToken, editarUsuarioFromUser);
