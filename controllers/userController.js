@@ -60,6 +60,11 @@ export const login = async (req, res) => {
 
     // Si la autenticación es correcta, generar un token
     const token = jwt.sign({ id: usuario._id, role: usuario.role }, JWT_SECRET, { expiresIn: '1h' });
+    res.cookie('token', token, {
+      httpOnly: true,       // Evita que la cookie sea accesible desde JavaScript (previene XSS)
+      secure: true,         // Asegura que la cookie solo se envíe a través de HTTPS
+      maxAge: 60 * 60 * 1000 // La cookie expirará en 1 hora
+  });
 
     res.status(200).json({ message: 'Autenticación exitosa', token });
   } catch (error) {
@@ -137,8 +142,6 @@ export const enviarDatosUsuario = (req, res) => {
   });
 };
 
-
-// Controlador para editar el email y la contraseña sólo desde el usuario autenticado
 // Controlador para editar el email y la contraseña sólo desde el usuario autenticado
 export const editarUsuarioFromUser = async (req, res) => {
   try {
@@ -147,16 +150,11 @@ export const editarUsuarioFromUser = async (req, res) => {
     
     // 2. Obtener el email, la nueva contraseña y la contraseña antigua del cuerpo de la solicitud
     const { email, password, oldPassword } = req.body;
-    
-    // 3. Buscar al usuario en la base de datos
     const usuario = await User.findById(usuarioId);
 
-    // 4. Verificar si el usuario existe
     if (!usuario) {
       return res.status(404).json({ message: 'Usuario no encontrado.' });
     }
-
-    // 5. Actualizar el email si fue proporcionado
     if (email) {
       usuario.email = email;
     }
@@ -177,11 +175,8 @@ export const editarUsuarioFromUser = async (req, res) => {
       const salt = await bcrypt.genSalt(10);
       usuario.password = await bcrypt.hash(password, salt);
     }
-
     // 7. Guardar el usuario actualizado en la base de datos
     const usuarioActualizado = await usuario.save();
-
-    // 8. Enviar una respuesta con el email actualizado (sin incluir la contraseña)
     res.status(200).json({
       message: 'Usuario actualizado exitosamente',
       usuario: {
@@ -190,7 +185,6 @@ export const editarUsuarioFromUser = async (req, res) => {
     });
 
   } catch (error) {
-    // 9. Manejo de errores
     res.status(500).json({
       message: 'Error al actualizar el usuario',
       error: error.message,

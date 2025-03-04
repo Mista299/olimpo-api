@@ -1,4 +1,5 @@
 import express from 'express';
+import cookieParser from 'cookie-parser';
 import { connectToDatabase } from './config/database.js';
 import deportistaRoutes from './routes/deportistaRoutes.js';
 import inscripcionRoutes from './routes/inscripcionRoutes.js';
@@ -11,6 +12,7 @@ const app = express();
 
 // Middleware para parsear JSON
 app.use(express.json());
+app.use(cookieParser()); // Para manejar cookies
 
 const allowedOrigins = ['http://localhost:5173', 'https://olimpo-api.vercel.app/'];
 app.use(cors(allowedOrigins));
