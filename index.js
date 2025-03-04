@@ -6,7 +6,7 @@ import inscripcionRoutes from './routes/inscripcionRoutes.js';
 import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import router from './routes/router.js';
-import cors from 'cors'
+import cors from 'cors';
 
 const app = express();
 
@@ -14,8 +14,19 @@ const app = express();
 app.use(express.json());
 app.use(cookieParser()); // Para manejar cookies
 
-const allowedOrigins = ['http://localhost:5173', 'https://olimpo-api.vercel.app/'];
-app.use(cors(allowedOrigins));
+// Configuración CORS
+const allowedOrigins = ['http://localhost:5173', 'https://olimpo-api.vercel.app'];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (allowedOrigins.includes(origin) || !origin) {
+      callback(null, true);
+    } else {
+      callback(new Error('Origen no permitido por CORS'));
+    }
+  },
+  credentials: true, // Permitir el envío de credenciales (cookies, headers)
+}));
 
 // Conectar a la base de datos
 connectToDatabase();
@@ -26,8 +37,6 @@ app.use('/api/inscripciones', inscripcionRoutes);
 app.use('/api/user', userRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/', router);
-
-
 
 // Ruta de pruebas
 app.get('/', (req, res) => {
