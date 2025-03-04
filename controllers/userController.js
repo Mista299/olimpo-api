@@ -60,9 +60,9 @@ export const login = async (req, res) => {
 
     // Si la autenticación es correcta, generar un token
     const token = jwt.sign({ id: usuario._id, role: usuario.role }, JWT_SECRET, { expiresIn: '1h' });
-    res.cookie('token', token, {
+    res.cookie('putotoken', token, {
       httpOnly: true,       // Evita que la cookie sea accesible desde JavaScript (previene XSS)
-      secure: true,
+      secure: false,
       sameSite: 'None',         // Asegura que la cookie solo se envíe a través de HTTPS
       maxAge: 60 * 60 * 1000 // La cookie expirará en 1 hora
   });

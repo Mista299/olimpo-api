@@ -2,20 +2,26 @@
 import jwt from 'jsonwebtoken';
 
 export const verificarToken = (req, res, next) => {
-  const token = req.cookies.token;
+  console.log('Middleware verificarToken ejecutado');
+  console.log('Cookies:', req.cookies);
 
+  const token = req.cookies.putotoken;
   if (!token) {
+    console.log('Token no proporcionado');
     return res.status(403).json({ message: 'Acceso denegado, token no proporcionado' });
   }
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-    req.user = decoded; // Decodifica el token y lo agrega al objeto req
+    console.log('Token verificado correctamente:', decoded);
+    req.user = decoded;
     next();
   } catch (error) {
+    console.log('Error al verificar el token:', error);
     return res.status(401).json({ message: 'Token inválido o expirado' });
   }
 };
+
 
 
 export const verificarAdmin = (req, res, next) => {
