@@ -1,9 +1,14 @@
 // Archivo: middlewares/auth.js
 import jwt from 'jsonwebtoken';
+import dotenv from 'dotenv';
+
+dotenv.config();
+const JWT_SECRET = process.env.JWT_SECRET;
 
 export const verificarToken = (req, res, next) => {
   console.log('Middleware verificarToken ejecutado');
   console.log('Cookies:', req.cookies);
+  console.log("probando la var JWT_SECRET: ", JWT_SECRET)
 
   const token = req.cookies.putotoken;
   if (!token) {
