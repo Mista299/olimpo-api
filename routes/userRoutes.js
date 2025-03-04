@@ -1,6 +1,6 @@
 import express from 'express';
 import { verificarToken, verificarAdmin } from '../middlewares/authMiddleware.js';
-import { agregarUsuario, obtenerTodosLosUsuarios, eliminarUsuario, editarUsuarioFromUser } from '../controllers/userController.js';
+import { agregarUsuario, obtenerTodosLosUsuarios, eliminarUsuario, editarUsuarioFromUser, enviarDatosUsuario } from '../controllers/userController.js';
 
 const router = express.Router();
 
@@ -10,7 +10,7 @@ router.post('/', agregarUsuario);
 // Ruta protegida para obtener todos los usuarios (GET)
 
 //editar como admin
-router.get('/', verificarToken, verificarAdmin, obtenerTodosLosUsuarios);
+router.get('/', verificarToken, verificarAdmin, obtenerTodosLosUsuarios, enviarDatosUsuario);
 router.delete('/:email', verificarToken, verificarAdmin, eliminarUsuario);
 //editar como usuario
 router.put('/', verificarToken, editarUsuarioFromUser);

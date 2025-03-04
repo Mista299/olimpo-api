@@ -137,6 +137,15 @@ export const eliminarUsuario = async (req, res) => {
 };
 
 export const enviarDatosUsuario = (req, res) => {
+  // Depuración: Mostrar las cookies que el servidor está leyendo
+  console.log('Cookies recibidas:', req.cookies); // Asegúrate de que tienes acceso a las cookies
+
+  if (req.cookies && req.cookies.token) {
+    console.log('Token recibido:', req.cookies.token); // Para ver si el token se envió correctamente
+  } else {
+    console.log('No se encontró la cookie de token');
+  }
+
   res.json({
     message: `Bienvenido al panel de ${req.user.role}`,
     usuarioAutenticado: req.user // Devuelve la data completa del usuario autenticado
