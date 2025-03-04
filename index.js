@@ -18,14 +18,8 @@ app.use(cookieParser()); // Para manejar cookies
 const allowedOrigins = ['http://localhost:5173', 'https://olimpo-api.vercel.app'];
 
 app.use(cors({
-  origin: (origin, callback) => {
-    if (allowedOrigins.includes(origin) || !origin) {
-      callback(null, true);
-    } else {
-      callback(new Error('Origen no permitido por CORS'));
-    }
-  },
-  credentials: true, // Permitir el envío de credenciales (cookies, headers)
+  origin: allowedOrigins,
+  credentials: true // Permitir envío de cookies
 }));
 
 // Conectar a la base de datos
