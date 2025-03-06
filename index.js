@@ -21,7 +21,9 @@ app.use(cookieParser()); // Para manejar cookies
 const allowedOrigins = ['http://localhost:5173', 'https://olimpo-api.vercel.app', 'https://olimpoacademia.com'];
 app.use(cors({
   origin: allowedOrigins,
-  credentials: true // Asegúrate de permitir el envío de cookies
+  credentials: true, 
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 
