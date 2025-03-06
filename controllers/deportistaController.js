@@ -1,12 +1,14 @@
-import Deportista from '../models/deportistaSchema.js';  // Asegúrate de tener tu modelo de "Deportista"
-import User from '../models/userSchema.js'; // Asegúrate de importar tu modelo de User
+import Deportista from '../models/deportistaSchema.js'; 
+import User from '../models/userSchema.js'; 
+import { DeportistaSchema } from '../schemas/deportistaSchema.js';
 
-// Controlador para crear un deportista
 export const crearDeportista = async (req, res) => {
   const { nombre_deportista, cedula_deportista, email_deportista, direccion_deportista, telefono_deportista, eps_deportista, fecha_nacimiento_deportista, nombre_padre_madre, sede, terminos_aceptados } = req.body;
 
   try {
-    // Verifica si ya existe un deportista con la misma cédula
+    // Validación con Zod
+    const validatedData = DeportistaSchema.parse(req.body); // Si hay errores, Zod lanza una excepción.
+    
     const deportistaExistente = await Deportista.findOne({ cedula_deportista });
 
     if (deportistaExistente) {
@@ -15,21 +17,8 @@ export const crearDeportista = async (req, res) => {
       });
     }
 
-    // Si no existe, crea el nuevo deportista
-    const nuevoDeportista = new Deportista({
-      nombre_deportista,
-      cedula_deportista,
-      email_deportista,
-      direccion_deportista,
-      telefono_deportista,
-      eps_deportista,
-      fecha_nacimiento_deportista,
-      nombre_padre_madre,
-      sede,
-      terminos_aceptados,
-    });
+    const nuevoDeportista = new Deportista(validatedData);
 
-    // Guarda el deportista en la base de datos
     await nuevoDeportista.save();
 
     res.status(201).json({
@@ -37,6 +26,14 @@ export const crearDeportista = async (req, res) => {
       deportista: nuevoDeportista,
     });
   } catch (error) {
+    // Manejo de errores de validación
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        message: 'Error en la validación de datos',
+        errors: error.errors,
+      });
+    }
+
     res.status(500).json({
       message: 'Error al crear el deportista',
       error: error.message,
@@ -44,19 +41,16 @@ export const crearDeportista = async (req, res) => {
   }
 };
 
+
 export const obtenerDeportistas = async (req, res) => {
   try {
-    // Busca todos los deportistas en la base de datos
     const deportistas = await Deportista.find();
 
-    // Si no hay deportistas, envía un mensaje
     if (deportistas.length === 0) {
       return res.status(404).json({
         message: 'No se encontraron deportistas.',
       });
     }
-
-    // Devuelve la lista de deportistas
     res.status(200).json(deportistas);
   } catch (error) {
     res.status(500).json({
@@ -116,54 +110,66 @@ export const newUserDeportista = async (cedulaUsuario, datosDeportista) => {
 };
 
 export const editarDeportista = async (req, res) => {
-  const id = req.params._id; // Captura el _id desde la URL
+  const id = req.params._id;
 
   try {
-      // Busca el deportista por _id
-      const deportista = await Deportista.findById(id);
+    const deportista = await Deportista.findById(id);
 
-      if (!deportista) {
-          return res.status(404).json({ message: 'Deportista no encontrado' });
-      }
+    if (!deportista) {
+      return res.status(404).json({ message: 'Deportista no encontrado' });
+    }
+
+    try {
+      const validatedData = DeportistaSchema.partial().parse(req.body); // El método partial() permite validar sólo campos enviados
 
       // Itera sobre las propiedades de req.body y actualiza el documento deportista
-      for (const key in req.body) {
-          if (req.body.hasOwnProperty(key) && deportista[key] !== undefined) {
-              deportista[key] = req.body[key]; // Actualiza cada campo solo si existe en el body
-          }
+      for (const key in validatedData) {
+        if (validatedData.hasOwnProperty(key) && deportista[key] !== undefined) {
+          deportista[key] = validatedData[key]; // Actualiza cada campo solo si existe en el body validado
+        }
       }
 
       // Guarda los cambios
       await deportista.save();
 
       res.status(200).json({
-          message: 'Deportista actualizado exitosamente',
-          deportista
+        message: 'Deportista actualizado exitosamente',
+        deportista,
       });
+    } catch (validationError) {
+      return res.status(400).json({
+        message: 'Datos inválidos',
+        error: validationError.errors, // Devuelve los errores de validación específicos
+      });
+    }
+
   } catch (error) {
-      res.status(500).json({
-          message: 'Error al actualizar el deportista.',
-          error
-      });
+    res.status(500).json({
+      message: 'Error al actualizar el deportista.',
+      error: error.message,
+    });
   }
 };
 
+import { DeportistaSchema } from '../schemas/deportistaSchema.js'; // Importa tu esquema
+
 export const editarDeportistaFromUser = async (req, res) => {
-  const { cedula_deportista } = req.params; // Cédula del deportista que se quiere editar
-  const usuarioAutenticado = req.user; // Suponiendo que el middleware verificarToken añade el usuario autenticado a req.user
+  const { cedula_deportista } = req.params; 
+  const usuarioAutenticado = req.user; 
 
   try {
-    // Verifica si la cédula del deportista coincide con la del usuario autenticado
     if (usuarioAutenticado.cedula_deportista !== cedula_deportista) {
       return res.status(403).json({
         message: 'No tienes permiso para editar los datos de otro deportista.',
       });
     }
 
-    // Si pasa la validación, procede a editar los datos del deportista
+    // Validación con Zod para los datos que se van a actualizar
+    const validatedData = DeportistaSchema.parse(req.body);
+
     const deportistaActualizado = await Deportista.findOneAndUpdate(
-      { cedula_deportista }, 
-      req.body, 
+      { cedula_deportista },
+      validatedData, // Usa los datos validados
       { new: true }
     );
 
@@ -176,10 +182,18 @@ export const editarDeportistaFromUser = async (req, res) => {
       deportista: deportistaActualizado,
     });
   } catch (error) {
+    if (error instanceof ZodError) {
+      return res.status(400).json({
+        message: 'Error en la validación de datos',
+        errors: error.errors,
+      });
+    }
+
     res.status(500).json({
       message: 'Error al actualizar el deportista',
       error: error.message,
     });
   }
 };
+
 
