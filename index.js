@@ -1,4 +1,6 @@
 import express from 'express';
+import https from 'https';
+import fs from 'fs';
 import cookieParser from 'cookie-parser';
 import { connectToDatabase } from './config/database.js';
 import deportistaRoutes from './routes/deportistaRoutes.js';
@@ -7,6 +9,7 @@ import userRoutes from './routes/userRoutes.js';
 import authRoutes from './routes/authRoutes.js';
 import router from './routes/router.js';
 import cors from 'cors';
+
 
 const app = express();
 

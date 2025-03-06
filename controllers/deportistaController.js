@@ -116,38 +116,37 @@ export const newUserDeportista = async (cedulaUsuario, datosDeportista) => {
 };
 
 export const editarDeportista = async (req, res) => {
-    const cedula = req.params.cedula_deportista; // Captura la cédula desde la URL
+  const id = req.params._id; // Captura el _id desde la URL
 
-    try {
-        // Busca el deportista por la cédula
-        const deportista = await Deportista.findOne({ cedula_deportista: cedula });
+  try {
+      // Busca el deportista por _id
+      const deportista = await Deportista.findById(id);
 
-        if (!deportista) {
-            return res.status(404).json({ message: 'Deportista no encontrado' });
-        }
+      if (!deportista) {
+          return res.status(404).json({ message: 'Deportista no encontrado' });
+      }
 
-        // Itera sobre las propiedades de req.body y actualiza el documento deportista
-        for (const key in req.body) {
-            if (req.body.hasOwnProperty(key) && deportista[key] !== undefined) {
-                deportista[key] = req.body[key]; // Actualiza cada campo solo si existe en el body
-            }
-        }
+      // Itera sobre las propiedades de req.body y actualiza el documento deportista
+      for (const key in req.body) {
+          if (req.body.hasOwnProperty(key) && deportista[key] !== undefined) {
+              deportista[key] = req.body[key]; // Actualiza cada campo solo si existe en el body
+          }
+      }
 
-        // Guarda los cambios
-        await deportista.save();
+      // Guarda los cambios
+      await deportista.save();
 
-        res.status(200).json({
-            message: 'Deportista actualizado exitosamente',
-            deportista
-        });
-    } catch (error) {
-        res.status(500).json({
-            message: 'Error al actualizar el deportista.',
-            error
-        });
-    }
+      res.status(200).json({
+          message: 'Deportista actualizado exitosamente',
+          deportista
+      });
+  } catch (error) {
+      res.status(500).json({
+          message: 'Error al actualizar el deportista.',
+          error
+      });
+  }
 };
-
 
 export const editarDeportistaFromUser = async (req, res) => {
   const { cedula_deportista } = req.params; // Cédula del deportista que se quiere editar
