@@ -196,4 +196,27 @@ export const editarDeportistaFromUser = async (req, res) => {
   }
 };
 
+export const eliminarDeportista = async (req, res) => {
+  const id = req.params._id; // Captura el _id desde la URL
 
+  try {
+    // Busca y elimina el deportista por _id
+    const deportistaEliminado = await Deportista.findByIdAndDelete(id);
+
+    if (!deportistaEliminado) {
+      return res.status(404).json({
+        message: 'Deportista no encontrado.',
+      });
+    }
+
+    res.status(200).json({
+      message: 'Deportista eliminado exitosamente',
+      deportista: deportistaEliminado, // Puedes devolver los detalles del deportista eliminado si es necesario
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: 'Error al eliminar el deportista.',
+      error: error.message,
+    });
+  }
+};
