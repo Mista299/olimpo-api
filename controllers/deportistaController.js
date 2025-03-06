@@ -151,8 +151,6 @@ export const editarDeportista = async (req, res) => {
   }
 };
 
-import { DeportistaSchema } from '../schemas/deportistaSchema.js'; // Importa tu esquema
-
 export const editarDeportistaFromUser = async (req, res) => {
   const { cedula_deportista } = req.params; 
   const usuarioAutenticado = req.user; 
