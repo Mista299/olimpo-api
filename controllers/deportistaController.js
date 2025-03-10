@@ -123,6 +123,8 @@ export const editarDeportista = async (req, res) => {
       const validatedData = DeportistaSchema.partial().parse(req.body); // El método partial() permite validar sólo campos enviados
 
       // Itera sobre las propiedades de req.body y actualiza el documento deportista
+      console.log(req.body); // Agrega este log para depurar los datos recibidos
+
       for (const key in validatedData) {
         if (validatedData.hasOwnProperty(key) && deportista[key] !== undefined) {
           deportista[key] = validatedData[key]; // Actualiza cada campo solo si existe en el body validado
@@ -195,11 +197,11 @@ export const editarDeportistaFromUser = async (req, res) => {
 };
 
 export const eliminarDeportista = async (req, res) => {
-  const id = req.params._id; // Captura el _id desde la URL
+  const _id = req.params._id; // Captura el _id desde la URL
 
   try {
     // Busca y elimina el deportista por _id
-    const deportistaEliminado = await Deportista.findByIdAndDelete(id);
+    const deportistaEliminado = await Deportista.findByIdAndDelete(_id);
 
     if (!deportistaEliminado) {
       return res.status(404).json({

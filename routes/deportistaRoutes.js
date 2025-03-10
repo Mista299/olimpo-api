@@ -10,7 +10,7 @@ router.post('/', crearDeportista, verificarToken);
 //editar como admin
 router.get('/', verificarToken, verificarAdmin, obtenerDeportistas);
 router.put('/:_id', verificarToken, verificarAdmin, editarDeportista );
-router.delete('/deportistas/:_id',verificarToken, verificarAdmin, eliminarDeportista);
+router.delete('/:_id',verificarToken, verificarAdmin, eliminarDeportista);
 //editar como usuario
 router.put('/editar', verificarToken, editarDeportistaFromUser );
 
