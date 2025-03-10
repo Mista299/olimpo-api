@@ -41,7 +41,6 @@ export const crearDeportista = async (req, res) => {
   }
 };
 
-
 export const obtenerDeportistas = async (req, res) => {
   try {
     const deportistas = await Deportista.find();
@@ -51,7 +50,14 @@ export const obtenerDeportistas = async (req, res) => {
         message: 'No se encontraron deportistas.',
       });
     }
-    res.status(200).json(deportistas);
+
+    // Convertimos la fecha al formato corto para cada deportista
+    const deportistasConFechaFormateada = deportistas.map(deportista => ({
+      ...deportista._doc, // Copia todas las propiedades del documento original
+      fecha_nacimiento_deportista: new Date(deportista.fecha_nacimiento_deportista).toISOString().split('T')[0] // Formatea la fecha
+    }));
+
+    res.status(200).json(deportistasConFechaFormateada);
   } catch (error) {
     res.status(500).json({
       message: 'Error al obtener los deportistas',
@@ -59,6 +65,7 @@ export const obtenerDeportistas = async (req, res) => {
     });
   }
 };
+
 
 // Método para vincular un deportista existente a un usuario usando el email del usuario y la cédula del deportista
 export const vincularDeportistaExistenteAUsuario = async (emailUsuario, cedulaDeportista) => {
