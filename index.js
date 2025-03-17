@@ -18,13 +18,14 @@ app.use(express.json());
 app.use(cookieParser()); // Para manejar cookies
 
 // Configuración CORS
-const allowedOrigins = ['http://localhost:5173', 'https://olimpo-api.vercel.app', 'https://olimpoacademia.com'];
+const allowedOrigins = ['http://localhost:5173', 'https://olimpoacademia.com', 'https://olimpoacademia.com/adminpanel'];
 app.use(cors({
   origin: allowedOrigins,
   credentials: true, 
   methods: ['GET', 'POST', 'PUT', 'DELETE'],
   allowedHeaders: ['Content-Type', 'Authorization']
 }));
+app.options('*', cors()); // Responde a solicitudes preflight
 
 
 // Conectar a la base de datos

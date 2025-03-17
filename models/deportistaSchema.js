@@ -1,7 +1,6 @@
 import mongoose from 'mongoose';
 import inscripcionSchema from './inscripcionSchema.js'; // Importamos el esquema, no el modelo
 
-// Esquema de deportista
 const deportistaSchema = new mongoose.Schema({
   nombre_deportista: { type: String, required: true },
   cedula_deportista: { type: Number, required: true, unique: true },
@@ -9,12 +8,12 @@ const deportistaSchema = new mongoose.Schema({
   telefono_deportista: { type: String, required: true },
   eps_deportista: { type: String, required: true },
   fecha_nacimiento_deportista: { type: Date, required: true },
-  nombre_padre_madre: { type: String, required: true },
+  nombre_padre_madre: { type: String, required: false },
   sede: { type: String, required: true }, // Las 4 sedes: Medellín, Rionegro, La Ceja, El Retiro
-  terminos_aceptados: { type: Boolean, required: true },
+  terminos_aceptados: { type: Boolean, required: false },
   fecha_inscripcion: { type: Date, default: Date.now },
   
-  // Información opcional de inscripción
+
   inscripcion: { type: inscripcionSchema, required: false } // Usamos el esquema como tipo
 });
 

@@ -3,11 +3,12 @@ import User from '../models/userSchema.js';
 import { DeportistaSchema } from '../schemas/deportistaSchema.js';
 
 export const crearDeportista = async (req, res) => {
-  const { nombre_deportista, cedula_deportista, email_deportista, direccion_deportista, telefono_deportista, eps_deportista, fecha_nacimiento_deportista, nombre_padre_madre, sede, terminos_aceptados } = req.body;
+  const { nombre_deportista, cedula_deportista, direccion_deportista, telefono_deportista, eps_deportista, fecha_nacimiento_deportista, nombre_padre_madre, sede} = req.body;
 
   try {
-    // Validación con Zod
-    const validatedData = DeportistaSchema.parse(req.body); // Si hay errores, Zod lanza una excepción.
+    console.log("validando datos recibidos: ")
+    console.log(req.body)
+    const validatedData = DeportistaSchema.parse(req.body);
     
     const deportistaExistente = await Deportista.findOne({ cedula_deportista });
 
@@ -26,7 +27,6 @@ export const crearDeportista = async (req, res) => {
       deportista: nuevoDeportista,
     });
   } catch (error) {
-    // Manejo de errores de validación
     if (error instanceof ZodError) {
       return res.status(400).json({
         message: 'Error en la validación de datos',
