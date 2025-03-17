@@ -18,6 +18,14 @@ app.use(express.json());
 app.use(cookieParser()); // Para manejar cookies
 
 // Configuración CORS
+app.use((req, res, next) => {
+  res.header('Access-Control-Allow-Origin', 'https://olimpoacademia.com');  // Permite el dominio de tu frontend
+  res.header('Access-Control-Allow-Credentials', 'true');  // Permite envío de cookies o credenciales
+  res.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE');  // Métodos permitidos
+  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization');  // Encabezados permitidos
+  next();
+});
+
 const allowedOrigins = ['http://localhost:5173', 'https://olimpoacademia.com', 'https://olimpoacademia.com/adminpanel'];
 app.use(cors({
   origin: allowedOrigins,
