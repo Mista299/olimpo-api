@@ -4,7 +4,7 @@ import { DeportistaSchema } from '../schemas/deportistaSchema.js';
 
 export const crearDeportista = async (req, res) => {
   const { nombre_deportista, cedula_deportista, direccion_deportista, telefono_deportista, eps_deportista, fecha_nacimiento_deportista, nombre_padre_madre, sede} = req.body;
-
+  
   try {
     console.log("validando datos recibidos: ")
     console.log(req.body)
