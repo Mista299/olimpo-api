@@ -4,42 +4,56 @@ import { DeportistaSchema } from '../schemas/deportistaSchema.js';
 
 export const crearDeportista = async (req, res) => {
   const { nombre_deportista, cedula_deportista, direccion_deportista, telefono_deportista, eps_deportista, fecha_nacimiento_deportista, nombre_padre_madre, sede} = req.body;
-  
-  try {
-    console.log("validando datos recibidos: ")
-    console.log(req.body)
-    const validatedData = DeportistaSchema.parse(req.body);
-    
-    const deportistaExistente = await Deportista.findOne({ cedula_deportista });
 
+  try {
+    console.log("Validando datos recibidos: ");
+    console.log(req.body);
+
+    // Validación con Zod
+    const validatedData = DeportistaSchema.parse(req.body);
+    console.log("Datos validados correctamente.");
+
+    // Verificar si el deportista ya existe
+    const deportistaExistente = await Deportista.findOne({ cedula_deportista });
     if (deportistaExistente) {
+      console.log("El deportista con esta cédula ya existe.");
       return res.status(400).json({
         message: 'El deportista con esta cédula ya existe.',
       });
     }
 
+    // Si no existe, crear el nuevo deportista
+    console.log("Creando nuevo deportista...");
     const nuevoDeportista = new Deportista(validatedData);
 
+    // Guardar el deportista en la base de datos
     await nuevoDeportista.save();
+    console.log("Deportista guardado correctamente.");
 
-    res.status(201).json({
+    // Respuesta exitosa
+    return res.status(201).json({
       message: 'Deportista creado exitosamente',
       deportista: nuevoDeportista,
     });
   } catch (error) {
-    if (error instanceof ZodError) {
+    // Manejo de errores de Zod
+    if (error instanceof z.ZodError) {
+      console.log("Error de validación con Zod:", error.errors);
       return res.status(400).json({
         message: 'Error en la validación de datos',
         errors: error.errors,
       });
     }
 
-    res.status(500).json({
+    // Otros errores, como errores en la base de datos
+    console.log("Error al crear el deportista:", error.message);
+    return res.status(500).json({
       message: 'Error al crear el deportista',
       error: error.message,
     });
   }
 };
+
 
 export const obtenerDeportistas = async (req, res) => {
   try {
