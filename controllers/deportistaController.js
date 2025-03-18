@@ -1,6 +1,8 @@
 import Deportista from '../models/deportistaSchema.js'; 
 import User from '../models/userSchema.js'; 
 import { DeportistaSchema } from '../schemas/deportistaSchema.js';
+import { z } from 'zod';
+
 
 export const crearDeportista = async (req, res) => {
   const { nombre_deportista, cedula_deportista, direccion_deportista, telefono_deportista, eps_deportista, fecha_nacimiento_deportista, nombre_padre_madre, sede} = req.body;
