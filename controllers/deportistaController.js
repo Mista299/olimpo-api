@@ -2,7 +2,88 @@ import Deportista from '../models/deportistaSchema.js';
 import User from '../models/userSchema.js'; 
 import { DeportistaSchema } from '../schemas/deportistaSchema.js';
 import { z } from 'zod';
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
+dotenv.config();
+
+export const enviarEmailInscripcion = async (deportista) => {
+  try {
+    const transporter = nodemailer.createTransport({
+      service: 'gmail',
+      auth: {
+        user: process.env.EMAIL_USER,
+        pass: process.env.EMAIL_PASS
+      }
+    });
+
+    const mailOptions = {
+      from: process.env.EMAIL_USER,
+      to: "olimpogimnasiaclub@gmail.com",
+      subject: 'Inscripción Exitosa - Olimpo Academia de Gimnasia',
+      html: `
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+          <h2 style="color: #0055a5;">Inscripción Confirmada</h2>
+          <p>¡Hola! Te confirmamos que la inscripción del deportista ha sido exitosa. Aquí están los detalles:</p>
+
+          <table style="width: 100%; border-collapse: collapse; margin-top: 15px;">
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Nombres y apellidos del deportista:</td>
+              <td style="padding: 8px;">${deportista.nombre_deportista}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Cédula o tarjeta de identidad:</td>
+              <td style="padding: 8px;">${deportista.cedula_deportista}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Dirección de residencia:</td>
+              <td style="padding: 8px;">${deportista.direccion_deportista}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Teléfono del deportista:</td>
+              <td style="padding: 8px;">${deportista.telefono_deportista}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Dirección:</td>
+              <td style="padding: 8px;">${deportista.direccion_deportista}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">EPS del deportista:</td>
+              <td style="padding: 8px;">${deportista.eps_deportista}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Fecha de nacimiento:</td>
+              <td style="padding: 8px;">${deportista.fecha_nacimiento_deportista}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Nombre del padre/madre:</td>
+              <td style="padding: 8px;">${deportista.nombre_padre_madre}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Sede seleccionada:</td>
+              <td style="padding: 8px;">${deportista.sede}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Horario de la sede:</td>
+              <td style="padding: 8px;">${deportista.horario_sede || 'No especificado'}</td>
+            </tr>
+            <tr>
+              <td style="padding: 8px; font-weight: bold;">Aceptó términos y condiciones:</td>
+              <td style="padding: 8px;">Sí</td>
+            </tr>
+          </table>
+
+          <p style="margin-top: 20px;">Gracias por confiar en <strong>Olimpo Academia de Gimnasia</strong>.</p>
+        </div>
+      `
+    };
+
+    await transporter.sendMail(mailOptions);
+    console.log('Correo de inscripción enviado con éxito.');
+  } catch (error) {
+    console.error('Error al enviar el correo:', error.message);
+  }
+};
 
 export const crearDeportista = async (req, res) => {
   const { nombre_deportista, cedula_deportista, direccion_deportista, telefono_deportista, eps_deportista, fecha_nacimiento_deportista, nombre_padre_madre, sede} = req.body;
@@ -10,7 +91,7 @@ export const crearDeportista = async (req, res) => {
   try {
     console.log("Validando datos recibidos: ");
     console.log(req.body);
-
+    
     // Validación con Zod
     const validatedData = DeportistaSchema.parse(req.body);
     console.log("Datos validados correctamente.");
@@ -27,15 +108,15 @@ export const crearDeportista = async (req, res) => {
     // Si no existe, crear el nuevo deportista
     console.log("Creando nuevo deportista...");
     const nuevoDeportista = new Deportista(validatedData);
-
+    
     // Guardar el deportista en la base de datos
     await nuevoDeportista.save();
     console.log("Deportista guardado correctamente.");
-
-    // Respuesta exitosa
-    return res.status(201).json({
-      message: 'Deportista creado exitosamente',
-      deportista: nuevoDeportista,
+    req.nuevoDeportista = nuevoDeportista;
+    await enviarEmailInscripcion(nuevoDeportista); 
+    res.status(201).json({
+      message: 'Deportista creado y correo enviado exitosamente',
+      deportista: nuevoDeportista
     });
   } catch (error) {
     // Manejo de errores de Zod
@@ -55,7 +136,6 @@ export const crearDeportista = async (req, res) => {
     });
   }
 };
-
 
 export const obtenerDeportistas = async (req, res) => {
   try {
